@@ -38,7 +38,7 @@ resource "azurerm_route_table" "route_table_primary" {
 resource "azurerm_route" "nva_route_primary" {
   name                   = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].name
   resource_group_name    = var.resource_group_name
-  route_table_name       = azurerm_route_table.route_primary.name
+  route_table_name       = azurerm_route_table.route_table_primary.name
   address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
   next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
   next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
@@ -57,7 +57,7 @@ resource "azurerm_route" "nva_route_secondary" {
   count                  = local.ha_count
   name                   = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].name
   resource_group_name    = var.dr_resource_group_name
-  route_table_name       = azurerm_route_table.route_secondary[count.index].name
+  route_table_name       = azurerm_route_table.route_table_secondary[count.index].name
   address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
   next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
   next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
