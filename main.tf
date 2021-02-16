@@ -28,7 +28,7 @@ resource "random_password" "password" {
 
 resource "azurerm_template_deployment" "managed_instance-primary" {
   name                = format("%s-primary", random_string.name.result)
-  resource_group_name = var.resource_group_name
+  resource_group_name = var.dr_resource_group_name
   timeouts {
     create = "300m"
     delete = "300m"
@@ -79,7 +79,7 @@ resource "azurerm_template_deployment" "managed_instance-primary" {
 DEPLOY
 
   deployment_mode = "Incremental"
-  depends_on      = [module.subnet_primary]
+  # depends_on      = [module.subnet_primary]
 }
 
 resource "azurerm_template_deployment" "managed_instance-dr" {
@@ -122,10 +122,20 @@ resource "azurerm_template_deployment" "managed_instance-dr" {
                 "timezoneId": "${var.timezone}"
             }
         }
-    ]
+    ],
+    "outputs": {
+      "instanceName": {
+        "type": "string",
+        "value": "${local.random_name}-mi-dr"
+    },
+      "resourceID": {
+          "type": "string",
+          "value": "[resourceId('Microsoft.Sql/managedInstances', '${local.random_name}-mi-dr')]"
+      }
+  }
 }
 DEPLOY
 
   deployment_mode = "Incremental"
-  depends_on      = [azurerm_template_deployment.managed_instance-primary, module.subnet_secondary]
+  depends_on      = [azurerm_template_deployment.managed_instance-primary] #, module.subnet_secondary]
 }

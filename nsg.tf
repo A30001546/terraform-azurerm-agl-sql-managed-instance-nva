@@ -33,7 +33,7 @@ module "nsg_secondary" {
   source               = "terraform.automation.agl.com.au/AGL/agl-nsg/azurerm"
   count                = local.ha_count
   name                 = var.dr_nsg_name
-  resource_group_name  = var.resource_group_name
+  resource_group_name  = var.dr_resource_group_name
   location             = var.dr_location
   tags                 = var.tags
   network_watcher_name = var.dr_network_watcher_name

@@ -27,35 +27,40 @@ locals {
   }
 }
 
-
-resource "azurerm_route_table" "route_primary" {
-  #count                         = local.sql_mi_env == "prod" && var.location == "australiasoutheast" ? 1 : 0
+resource "azurerm_route_table" "route_table_primary" {
   name                          = "agl-sql-mi-primary_route"
   resource_group_name           = var.resource_group_name
   location                      = var.location
   disable_bgp_route_propagation = true
   tags                          = var.tags
-
-  route {
-    name                   = local.route_config[join("_", [var.location, local.sql_mi_env])].name
-    address_prefix         = local.route_config[join("_", [var.location, local.sql_mi_env])].address_prefix
-    next_hop_type          = local.route_config[join("_", [var.location, local.sql_mi_env])].next_hop_type
-    next_hop_in_ip_address = local.route_config[join("_", [var.location, local.sql_mi_env])].next_hop_in_ip_address
-  }
 }
 
-resource "azurerm_route_table" "route_secondary" {
+resource "azurerm_route" "nva_route_primary" {
+  name                   = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].name
+  resource_group_name    = var.resource_group_name
+  route_table_name       = azurerm_route_table.route_primary.name
+  address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
+  next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
+  next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
+}
+
+resource "azurerm_route_table" "route_table_secondary" {
   count                         = local.ha_count
   name                          = "agl-sql-mi-secondary_route"
-  resource_group_name           = var.resource_group_name
+  resource_group_name           = var.dr_resource_group_name
   location                      = var.dr_location
   disable_bgp_route_propagation = true
   tags                          = var.tags
-
-  route {
-    name                   = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].name
-    address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
-    next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
-    next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
-  }
 }
+
+resource "azurerm_route" "nva_route_secondary" {
+  count                  = local.ha_count
+  name                   = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].name
+  resource_group_name    = var.dr_resource_group_name
+  route_table_name       = azurerm_route_table.route_secondary[count.index].name
+  address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
+  next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
+  next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
+}
+
+
