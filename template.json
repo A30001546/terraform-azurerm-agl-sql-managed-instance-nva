@@ -1,0 +1,116 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string",
+			"defaultValue": "admin11"
+        },
+        "administratorLoginPassword": {
+            "type": "securestring",
+			"defaultValue": "Qwerty@1234567890"
+        },
+        "location": {
+            "type": "string",
+			"defaultValue": "Australia southeast"
+        },
+        "managedInstanceName": {
+            "type": "string",
+			"defaultValue": "gms-prod-mi"
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+			"defaultValue": "management"
+        },
+        "virtualNetworkName": {
+            "type": "string",
+			"defaultValue": "vfrnfoya-ymauqg"
+        },
+        "subnetName": {
+            "type": "string",
+			"defaultValue": "gms-mi-prod-subnet"
+        },
+        "skuName": {
+            "defaultValue": "GP_Gen5",
+            "type": "string"
+        },
+        "skuEdition": {
+            "defaultValue": "GeneralPurpose",
+            "type": "string"
+        },
+        "storageSizeInGB": {
+            "defaultValue": 32,
+            "type": "int"
+        },
+        "vCores": {
+            "defaultValue": 4,
+            "type": "int"
+        },
+        "licenseType": {
+            "defaultValue": "LicenseIncluded",
+            "type": "string"
+        },
+        "hardwareFamily": {
+            "defaultValue": "Gen5",
+            "type": "string"
+        },
+        "collation": {
+            "type": "string",
+            "defaultValue": "SQL_LATIN1_GENERAL_CP1_CI_AS"
+        },
+        "proxyOverride": {
+            "type": "string",
+            "defaultValue": "default"
+        },
+        "publicDataEndpointEnabled": {
+            "type": "bool",
+            "defaultValue": false
+        },
+        "timezoneId": {
+            "type": "string",
+            "defaultValue": "UTC"
+        },
+        "nsgForPublicEndpoint": {
+            "type": "string",
+            "defaultValue": "default"
+        }
+    },
+    "variables": {
+        "routeTableName": "[concat('rt-', parameters('managedInstanceName'))]",
+        "networkSecurityGroupName": "[concat('nsg-', parameters('managedInstanceName'))]",
+        "locations": [
+            "australiaeast",
+            "australiasoutheast"            
+        ]},
+    "resources": [
+          {
+            "type": "Microsoft.Sql/managedInstances",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuEdition')]"
+            },
+            "name": "[parameters('managedInstanceName')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "subnetId": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
+                "storageSizeInGB": "[parameters('storageSizeInGB')]",
+                "vCores": "[parameters('vCores')]",
+                "licenseType": "[parameters('licenseType')]",
+                "hardwareFamily": "[parameters('hardwareFamily')]",
+                "collation": "[parameters('collation')]",
+                "proxyOverride": "[parameters('proxyOverride')]",
+                "publicDataEndpointEnabled": "[parameters('publicDataEndpointEnabled')]",
+                "timezoneId": "[parameters('timezoneId')]"
+            },
+            "dependsOn": [
+                "updateSubnetTemplate"
+            ]
+        }
+    ]
+}

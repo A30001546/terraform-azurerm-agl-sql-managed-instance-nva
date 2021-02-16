@@ -1,0 +1,27 @@
+# Performs checks of the terraform module
+name: $(Rev:r)
+
+pool:
+  vmImage: ubuntu-18.04
+
+variables:
+  - group: aaa-common
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: AGLEnergy/TerraformPipelineTemplates
+      endpoint: AGLEnergy
+
+trigger:
+  - master
+
+pr:
+  - master
+
+steps:
+  - template: module-build-agent-prep.yml@templates
+  - template: module-tests.yml@templates
+    parameters:
+      testDirectory: examples/ci
