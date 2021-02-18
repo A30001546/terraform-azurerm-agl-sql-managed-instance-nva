@@ -1,23 +1,47 @@
-# agl-sql-managed-instance-nva
+# terraform-azurerm-agl-sql-managed-instance-nva
 
 Azure SQL managed Instance module
 
 ## Simple usage
 
   ```
+  terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+    }
+    null = {
+      source = "hashicorp/null"
+    }
+    tls = {
+      source = "hashicorp/tls"
+    }
+    random = {
+      source = "hashicorp/random"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
   provider "azurerm" {
   version         = "~>2.0" // Provider version required to be 2.x
   subscription_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   features {}
+  }
+
+  module "sql-mi" {
+  source               = "../../"
+  name                 = var.name
+  resource_group_name  = var.resource_group_name
+  location             = var.location
+  tags                 = var.tags
+  nsg_name             = var.nsg_name
+  subnet_name          = var.subnet_name
+  virtual_network_name = var.virtual_network_name
+  address_prefix       = var.address_prefix
+  network_watcher_name = var.network_watcher_name
 }
 
-  module "sql_instance" {
-  source              = "terraform.automation.agl.com.au/AGL/agl-sql-instance/azurerm"
-  location            = var.location
-  resource_group_name = var.resource_group
-  tags                = local.tags
-  subnet_id           = module.subnet_ause.id
-}
 module "sql_instance_db" {
   source               = "terraform.automation.agl.com.au/AGL/agl-sql-instance-db/azurerm"
   location             = var.location
@@ -26,26 +50,19 @@ module "sql_instance_db" {
   database_name        = "new-db"
 }
 
-module "subnet_ause" {
-  source                    = "terraform.automation.agl.com.au/AGL/agl-subnet/azurerm"
-  version                   = "2.0.0"
-  subnet_name               = "${var.app_name}-${var.environment}-ause"
-  resource_group_name       = var.mgmt_resource_group
-  virtual_network_name      = var.virtual_network_name_ause
-  address_prefix            = var.subnet_ause
-  network_security_group_id = azurerm_network_security_group.nsg-ause.id
-  delegation_name           = "Microsoft.Sql/managedInstances"
-  route_table_id            = azurerm_route_table.UDR-ASE.id
-}
-```
-**DEPLOY TIME WILL TAKE APPROX 4 HOURS - TERRAFORM AZURERM 2.0+ PROVIDER IS REQUIRED**
 
-* Ensure you copy in the UDR\URD.tf file from this repo to your workspace and attach it to your subnet (contains both regions)
+```
+**DEPLOY TIME WILL TAKE APPROX 4 HOURS - TERRAFORM 0.13 AND AZURERM 2.0+ PROVIDER IS REQUIRED**
+
+This module will create:
+* Route table with BGP propagation disabled
+
+* A this repo to your workspace and attach it to your subnet (contains both regions)
 * Ensure you copy in the NSG\NSG.tf file from this repo to your workspace and attach it to your subnet (contains both regions)
 * Subnets need to have this UDR attached
 * Subnets need to Include the NSG rules defined in this repo, this can be combined with other rules if required.
 * Subnets should be a minimum size of /27
-* Subnets require the delegation to Microsoft.sql/managedInstances
+* Subnets delegation to Microsoft.sql/managedInstances
 
 A shared managed instance will be more cost effective than a one to one.
 

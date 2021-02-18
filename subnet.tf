@@ -19,7 +19,7 @@ module "subnet_primary" {
   route_table_id                                 = azurerm_route_table.route_table_primary.id
   delegation_actions                             = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action", "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action", ]
 
-  # depends_on = [module.nsg_primary,azurerm_route_table.route_primary]
+ # depends_on = [module.nsg_primary]
 }
 
 module "subnet_secondary" {
@@ -36,5 +36,5 @@ module "subnet_secondary" {
   enforce_private_link_endpoint_network_policies = true
   route_table_id                                 = azurerm_route_table.route_table_secondary[count.index].id
   delegation_actions                             = ["Microsoft.Network/virtualNetworks/subnets/join/action", "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action", "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action", ]
-  # depends_on = [module.nsg_secondary,azurerm_route_table.route_secondary]
+ # depends_on = [module.nsg_secondary]
 }

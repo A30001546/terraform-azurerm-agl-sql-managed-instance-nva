@@ -42,6 +42,7 @@ resource "azurerm_route" "nva_route_primary" {
   address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
   next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
   next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
+  depends_on             = [azurerm_route_table.route_table_primary]
 }
 
 resource "azurerm_route_table" "route_table_secondary" {
@@ -61,6 +62,7 @@ resource "azurerm_route" "nva_route_secondary" {
   address_prefix         = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].address_prefix
   next_hop_type          = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_type
   next_hop_in_ip_address = local.route_config[join("_", [var.dr_location, local.sql_mi_env])].next_hop_in_ip_address
+  depends_on             = [azurerm_route_table.route_table_secondary]
 }
 
 

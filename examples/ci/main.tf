@@ -30,14 +30,6 @@ provider "azurerm" {
   features {}
 }
 
-//Central-logging provider
-provider "azurerm" {
-  alias           = "enterprise-services-prod"
-  version         = "~>2.0"                                // Provider version required to be 2.x
-  subscription_id = "876e5b0d-b7fb-47d2-b709-9c78a560f389" // Enterprise-Services-Production
-  features {}
-}
-
 locals {
   pipeline = "pipeline-module-azurerm-sql-database"
   tags = {
@@ -61,7 +53,6 @@ resource "azurerm_resource_group" "pipeline" {
 }
 */
 
-
 data "azurerm_network_watcher" "mgmt_network_watcher_australiaeast" {
   name                = "dphngcylae"
   resource_group_name = "management"
@@ -70,12 +61,6 @@ data "azurerm_network_watcher" "mgmt_network_watcher_australiaeast" {
 data "azurerm_network_watcher" "mgmt_network_watcher_australiasoutheast" {
   name                = "dphngcylase"
   resource_group_name = "management"
-}
-
-
-
-data "azurerm_resource_group" "workspace_sql_mi_testing" {
-  name = "workspace-sql-mi-testing"
 }
 
 module "sql-mi" {
@@ -92,7 +77,34 @@ module "sql-mi" {
   tags                 = local.tags
   nsg_name             = "sql-mi-testing-nsg-01"
   subnet_name          = "sql-mi-testing-subnet-01"
-  virtual_network_name = "dphngcyl-ypsrbg"
-  address_prefix       = "10.7.2.48/28"
+  virtual_network_name = "dphngcyl-pdhaqq"
+  address_prefix       = "10.6.1.64/28"
+  dr_resource_group_name = "workspace-sql-mi-testing"
   network_watcher_name = data.azurerm_network_watcher.mgmt_network_watcher_australiasoutheast.name
+  //dr variables
+  dr_subnet_name ="sql-mi-testing-dr-subnet-01"
+  dr_virtual_network_name = "dphngcyl-tvyxyd"
+  dr_address_prefix = "10.9.19.160/28"
+  dr_network_watcher_name = data.azurerm_network_watcher.mgmt_network_watcher_australiaeast.name
+  dr_nsg_name = "sql-mi-testing-dr-nsg-01"
+  ha_enabled = true
+  dr_location = "australiaeast"
 }
+
+output "name" {
+  value = module.sql-mi.name
+}
+
+output "pass" {
+  value = module.sql-mi.sqlpassword
+
+}
+
+output "dr_pass" {
+  value = module.sql-mi.dr_sqlpassword
+}
+
+output "dr_name" {
+  value = module.sql-mi.dr_name
+}
+
